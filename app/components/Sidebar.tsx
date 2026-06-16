@@ -129,10 +129,6 @@ export default function Sidebar({
               {!collapsed && <span className="font-medium">Admin & Roles</span>}
             </Link>
           </li>
-
-        
-
-
         <li>
           <Link
             href="/settings"
