@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Home, Users, Package, Settings,FolderTree,ShoppingCart ,Bike,Ticket,BarChart3,CreditCard,Bell,Shield} from "lucide-react";
 
+
 export default function Sidebar({
   collapsed,
 }: {
@@ -21,7 +22,7 @@ export default function Sidebar({
       <ul className="mt-5 space-y-2 px-2">
         <li>
           <Link
-            href="/"
+            href="/Dashboard"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800"
           >
             <Home size={20} />
@@ -30,7 +31,7 @@ export default function Sidebar({
         </li>
         <li>
           <Link
-            href="/categories"
+            href="/Dashboard/categories"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
           >
             <FolderTree size={20} />
@@ -39,7 +40,7 @@ export default function Sidebar({
         </li>
         <li>
           <Link
-            href="/products"
+            href="/Dashboard/products"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
           >
             <FolderTree size={20} />
@@ -49,7 +50,7 @@ export default function Sidebar({
 
         <li>
           <Link
-            href="/inventory"
+            href="/Dashboard/inventory"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
           >
             <Package size={20} />
@@ -58,7 +59,7 @@ export default function Sidebar({
         </li>
         <li>
           <Link
-            href="/orders"
+            href="/Dashboard/orders"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
           >
             <ShoppingCart size={20} />
@@ -67,7 +68,7 @@ export default function Sidebar({
         </li>
         <li>
           <Link
-            href="/customer"
+            href="/Dashboard/customer"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
           >
             <Users size={20} />
@@ -76,7 +77,7 @@ export default function Sidebar({
         </li>
         <li>
             <Link
-              href="/delivery-partners"
+              href="/Dashboard/delivery-partners"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <Bike size={20} />
@@ -85,7 +86,7 @@ export default function Sidebar({
           </li>
           <li>
             <Link
-              href="/coupons"
+              href="/Dashboard/coupons"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <Ticket size={20} />
@@ -95,7 +96,7 @@ export default function Sidebar({
           {/* NEW ITEM ADDED */}
           <li>
             <Link
-              href="/reports"
+              href="/Dashboard/reports"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <BarChart3 size={20} />
@@ -104,7 +105,7 @@ export default function Sidebar({
           </li>
           <li>
             <Link
-              href="/payment"
+              href="/Dashboard/payment"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <CreditCard size={20} />
@@ -113,7 +114,7 @@ export default function Sidebar({
           </li>
           <li>
             <Link
-              href="/notifications"
+              href="/Dashboard/notifications"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <Bell size={20} />
@@ -122,7 +123,7 @@ export default function Sidebar({
           </li>
           <li>
             <Link
-              href="/admin-roles"
+              href="/Dashboard/admin-roles"
               className="flex items-center gap-3 p-3 rounded hover:bg-slate-800 transition"
             >
               <Shield size={20} />
@@ -131,7 +132,7 @@ export default function Sidebar({
           </li>
         <li>
           <Link
-            href="/settings"
+            href="/Dashboard/settings"
             className="flex items-center gap-3 p-3 rounded hover:bg-slate-800"
           >
             <Settings size={20} />

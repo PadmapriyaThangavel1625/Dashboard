@@ -1,5 +1,4 @@
 import "./globals.css";
-import DashboardLayout from "./components/DashboardLayout";
 
 export default function RootLayout({
   children,
@@ -8,9 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <DashboardLayout>{children}</DashboardLayout>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
