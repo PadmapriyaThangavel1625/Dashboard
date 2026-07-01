@@ -48,44 +48,7 @@ export default function Sidebar({
         {collapsed ? "A" : "Admin"}
       </div>
 
-      {/* Profile Section */}
-      {!collapsed && (
-        <div className="p-4 border-b border-slate-700">
-          <div className="flex flex-col items-center">
-            <Image
-              src={profileImage}
-              alt="Profile"
-              width={80}
-              height={80}
-              className="rounded-full border-2 border-green-500 object-cover"
-            />
-
-            <h3 className="mt-3 font-semibold">Padmapriya</h3>
-
-            <p className="text-xs text-slate-400">
-              Administrator
-            </p>
-
-            <div className="flex items-center gap-1 mt-1">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span className="text-xs text-green-400">
-                Online
-              </span>
-            </div>
-
-            {/* Upload Button */}
-            <label className="mt-3 cursor-pointer bg-green-600 hover:bg-green-700 px-3 py-2 rounded text-sm">
-              Import Photo
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-        </div>
-      )}
+      
 
       {/* Menu */}
       <ul className="mt-5 space-y-2 px-2">
@@ -96,6 +59,15 @@ export default function Sidebar({
           >
             <Home size={20} />
             {!collapsed && "Dashboard"}
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/Dashboard/profile"
+            className="flex items-center gap-3 p-3 rounded hover:bg-slate-800"
+          >
+            <FolderTree size={20} />
+            {!collapsed && "Profile"}
           </Link>
         </li>
 

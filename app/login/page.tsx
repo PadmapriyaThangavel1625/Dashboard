@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi";
+import Image from "next/image";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const [step, setStep] = useState(1);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const cleanEmail = email.trim();
-    const cleanPassword = password;
-
-    if (!cleanEmail || !cleanPassword) {
-      alert("Please enter both email and password.");
+    if (!email || !password) {
+      toast.error("Enter Email & Password");
       return;
     }
 
@@ -26,121 +27,194 @@ export default function LoginPage() {
 
     try {
       const payload = new URLSearchParams();
-      payload.append("email", cleanEmail);
-      payload.append("password", cleanPassword);
 
-      const response = await fetch(
+      payload.append("email", email);
+      payload.append("password", password);
+
+      const res = await fetch(
         "https://sbstechnologies.in/cloud/mobile/login/check_user_login.php",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type":
+              "application/x-www-form-urlencoded",
           },
           body: payload.toString(),
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
+      const data = await res.json();
 
-      const data = await response.json();
+      if (data.success || data.status) {
+        toast.success("OTP Sent Successfully");
 
-      console.log("API RESPONSE:", data);
-
-      if (data.success === true || data.status === true) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify(data.data || data)
-        );
-
-        alert("Login Successful!");
-
-        router.push("/Dashboard");
+        setTimeout(() => {
+          setStep(2);
+        }, 1000);
       } else {
-        alert(
-          data.message ||
-            data.msg ||
-            "Warning! Please check login credentials."
+        toast.error(
+          data.message || "Invalid Login Credentials"
         );
       }
-    } catch (error) {
-      console.error("Login Error:", error);
+    } catch {
+      toast.error("Server Connection Failed");
+    }
 
-      alert(
-        "Unable to connect to the server. Please try again later."
-      );
-    } finally {
-      setLoading(false);
+    setLoading(false);
+  };
+
+  const verifyOTP = () => {
+    if (otp === "1234") {
+      toast.success("Login Successful");
+
+      setTimeout(() => {
+        window.location.href = "/Dashboard";
+      }, 1000);
+    } else {
+      toast.error("Invalid OTP");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-500 p-5">
-      <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-500 flex items-center justify-center p-5">
+
+      <Toaster position="top-right" />
+
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8">
+
         <div className="flex justify-center mb-5">
-          <div className="w-16 h-16 rounded-full bg-green-500 text-white text-3xl font-bold flex items-center justify-center shadow-lg">
-            S
-          </div>
+
+          <Image
+            src="/logo.jpg"
+            alt="logo"
+            width={90}
+            height={90}
+          />
+
         </div>
 
-        <h1 className="text-3xl font-bold text-green-700 text-center">
-          Sign In
+        <h1 className="text-3xl font-bold text-center text-green-700">
+          QuickCommerce
         </h1>
 
-        <p className="text-center text-gray-500 mt-2 mb-8">
-          Login to your account
+        <p className="text-center text-gray-500 mb-8">
+          Login to continue
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
-              Email
-            </label>
+        {step === 1 ? (
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
+          >
+            <div>
+
+              <label className="font-semibold text-gray-700">
+                Email
+              </label>
+
+              <div className="relative mt-2">
+
+                <FiMail className="absolute left-3 top-4 text-gray-400" />
+
+                <input
+                  type="email"
+                  placeholder="Enter Email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  className="w-full border rounded-xl py-3 pl-10 pr-3 outline-none focus:border-green-500"
+                />
+
+              </div>
+            </div>
+
+            <div>
+
+              <label className="font-semibold text-gray-700">
+                Password
+              </label>
+
+              <div className="relative mt-2">
+
+                <FiLock className="absolute left-3 top-4 text-gray-400" />
+
+                <input
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  className="w-full border rounded-xl py-3 pl-10 pr-12 outline-none focus:border-green-500"
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPassword(!showPassword)
+                  }
+                  className="absolute right-4 top-4"
+                >
+                  {showPassword ? (
+                    <FiEyeOff />
+                  ) : (
+                    <FiEye />
+                  )}
+                </button>
+
+              </div>
+            </div>
+
+            <button
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition"
+            >
+              {loading
+                ? "Signing In..."
+                : "SIGN IN"}
+            </button>
+
+          </form>
+        ) : (
+          <div className="space-y-6">
+
+            <div className="text-center">
+
+              <h2 className="text-2xl font-bold">
+                Verify OTP
+              </h2>
+
+              <p className="text-gray-500 mt-2">
+                Dummy OTP : <b>1234</b>
+              </p>
+
+            </div>
 
             <input
-              type="email"
-              placeholder="Enter Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-500 focus:ring-4 focus:ring-green-200 focus:outline-none"
+              type="text"
+              maxLength={4}
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) =>
+                setOtp(e.target.value)
+              }
+              className="w-full border rounded-xl py-3 text-center text-2xl tracking-[10px] outline-none focus:border-green-500"
             />
+
+            <button
+              onClick={verifyOTP}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold"
+            >
+              VERIFY OTP
+            </button>
+
           </div>
-
-          <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-700">
-              Password
-            </label>
-
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-500 focus:ring-4 focus:ring-green-200 focus:outline-none"
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 font-semibold"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow-md transition duration-200 disabled:bg-green-300 disabled:cursor-not-allowed"
-          >
-            {loading ? "SIGNING IN..." : "SIGN IN"}
-          </button>
-        </form>
+        )}
       </div>
     </div>
   );

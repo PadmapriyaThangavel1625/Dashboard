@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, LogOut } from "lucide-react";
 
 export default function Navbar({
   collapsed,
@@ -10,6 +10,19 @@ export default function Navbar({
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
 }) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm(
+      "Are you sure you want to logout?"
+    );
+
+    if (confirmLogout) {
+      localStorage.removeItem("token"); // optional
+      router.push("/login");
+    }
+  };
+
   return (
     <div className="h-16 bg-green-700 text-white flex items-center justify-between px-6">
       <button onClick={() => setCollapsed(!collapsed)}>
@@ -20,21 +33,13 @@ export default function Navbar({
         Admin Dashboard
       </div>
 
-      <div className="flex gap-4">
-        <Link
-          href="/login"
-          className="px-5 py-2 rounded-lg border border-white text-white font-medium hover:bg-white hover:text-green-700"
-        >
-          Login
-        </Link>
-
-        <Link
-          href="/registration"
-          className="px-5 py-2 rounded-lg bg-white text-green-700 font-medium hover:bg-gray-100"
-        >
-          Register
-        </Link>
-      </div>
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+      >
+        <LogOut size={18} />
+        Logout
+      </button>
     </div>
   );
 }
