@@ -1,251 +1,197 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { Pencil, Power } from "lucide-react";
+import AddCategoryDrawer from "@/app/components/AddCategoryDrawer";
 
 interface Category {
-  category_id: string;
+  category_id: number;
   category_name: string;
-  image_url: string | null;
-  icon_url?: string | null;
-  sub_categories: any[];
+  slug: string;
+  description: string;
+  display_order: number;
+  is_featured: number;
+  is_active: number;
+  sub_categories_count?: number;
 }
-
-const IMAGE_PATH = "https://sbstechnologies.in/ecommerce/images/categories/images/";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-
-  // Form states
-  const [category_name, setCategoryName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [display_order, setDisplayOrder] = useState(1);
-  const [is_active, setIsActive] = useState(1);
-
-  // File states
-  const [image, setImage] = useState<File | null>(null);
-  const [icon, setIcon] = useState<File | null>(null);
+  const [showPanel, setShowPanel] = useState(false);
 
   useEffect(() => {
-    fetchCategories();
+    loadCategories();
   }, []);
 
-  async function fetchCategories() {
+  async function loadCategories() {
     try {
-      // Bust browser cache during state refetches by appending a unique timestamp
-      const res = await fetch(`/api/categories?t=${Date.now()}`);
+      const res = await fetch("/api/categories", { cache: "no-store" });
       const data = await res.json();
-      
-      console.log("--- Loaded UI Grid Data ---", data);
-      if (data.status) {
-        setCategories(data.data || []);
-      }
+
+      let list: Category[] = [];
+
+      if (Array.isArray(data)) list = data;
+      else if (Array.isArray(data.categories)) list = data.categories;
+      else if (Array.isArray(data.data)) list = data.data;
+
+      setCategories(list);
     } catch (err) {
-      console.error("Error fetching categories:", err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
   }
 
-  function generateSlug(value: string) {
-    return value
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "");
-  }
-
-  function validateFile(file: File | null) {
-    if (!file) return true;
-    if (!["image/jpeg", "image/png"].includes(file.type)) {
-      alert("Only JPG or PNG format allowed");
-      return false;
-    }
-    if (file.size > 1024 * 1024) {
-      alert("File size exceeds 1MB limit");
-      return false;
-    }
-    return true;
-  }
-
-  async function handleSubmit() {
-    if (!category_name.trim()) return alert("Please enter a category name");
-    if (!validateFile(image) || !validateFile(icon)) return;
-
-    const form = new FormData();
-    form.append("action", "add");
-    form.append("category_name", category_name);
-    form.append("slug", slug || generateSlug(category_name));
-    form.append("description", description);
-    form.append("display_order", String(display_order));
-    form.append("is_active", String(is_active));
-
-    if (image) {
-      const ext = image.name.split(".").pop();
-      const renamed = new File([image], `${Date.now()}_category.${ext}`, { type: image.type });
-      form.append("image", renamed);
-    }
-
-    if (icon) {
-      const ext = icon.name.split(".").pop();
-      const renamed = new File([icon], `${Date.now()}_icon.${ext}`, { type: icon.type });
-      form.append("icon", renamed);
-    }
-
+  async function toggleStatus(category: Category) {
     try {
-      const res = await fetch("/api/categories", {
+      const formData = new FormData();
+      formData.append("category_id", category.category_id.toString());
+      formData.append(
+        "is_active",
+        category.is_active === 1 ? "0" : "1"
+      );
+
+      await fetch("/api/categories/status", {
         method: "POST",
-        body: form,
+        body: formData,
       });
 
-      const data = await res.json();
-      
-      // Look at your browser console layout tab to inspect these logs!
-      console.log("--- Submission Server Response ---", data);
-
-      alert(data.message || "Operation complete.");
-
-      if (data.status === true || data.status === "true" || data.status === 1) {
-        setShowModal(false);
-        setCategoryName("");
-        setSlug("");
-        setDescription("");
-        setImage(null);
-        setIcon(null);
-        
-        console.log("Triggering UI re-fetch query...");
-        fetchCategories();
-      } else {
-        console.warn("Server processed request but returned a false status flag.");
-      }
+      loadCategories();
     } catch (err) {
-      console.error("Critical submission failure:", err);
-      alert("An unexpected layout error occurred during submission.");
+      console.log(err);
     }
   }
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center font-medium text-gray-600">Loading items...</div>;
-  }
+  if (loading)
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="text-xl font-semibold text-gray-500">
+          Loading Categories...
+        </div>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      {/* HEADER SECTION */}
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-green-700">Categories</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="rounded bg-green-600 px-4 py-2 font-medium text-white shadow hover:bg-green-700 transition"
-        >
-          + Add Category
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="flex gap-6 items-start">
+        {/* Categories List */}
+        <div className="flex-1 bg-white rounded-2xl shadow-sm p-6 overflow-x-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Categories List
+            </h1>
 
-      {/* CATEGORIES GRID */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {categories.map((cat) => (
-          <div key={cat.category_id} className="overflow-hidden rounded-lg bg-white p-3 shadow transition hover:shadow-md">
-            <div className="relative h-40 w-full bg-gray-50 rounded overflow-hidden">
-              <Image
-                src={cat.image_url ? IMAGE_PATH + cat.image_url : "/no-image.jpg"}
-                alt={cat.category_name}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-            <h2 className="mt-3 font-semibold text-gray-800">{cat.category_name}</h2>
-          </div>
-        ))}
-      </div>
-
-      {/* FORM MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-[450px] rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <h2 className="mb-4 text-xl font-bold text-gray-800">Add New Category</h2>
-
-            <div className="space-y-3">
-              <input
-                className="w-full rounded border p-2 text-sm focus:outline-green-500"
-                placeholder="Category Name"
-                value={category_name}
-                onChange={(e) => setCategoryName(e.target.value)}
-              />
-
-              <input
-                className="w-full rounded border p-2 text-sm focus:outline-green-500"
-                placeholder="Slug (Optional)"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-              />
-
-              <textarea
-                className="w-full rounded border p-2 text-sm focus:outline-green-500"
-                placeholder="Description"
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-
-              <div>
-                <label className="text-xs font-bold uppercase text-gray-500">Category Image</label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  className="w-full mt-1 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-                  onChange={(e) => setImage(e.target.files?.[0] || null)}
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold uppercase text-gray-500">Category Icon</label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  className="w-full mt-1 text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-                  onChange={(e) => setIcon(e.target.files?.[0] || null)}
-                />
-              </div>
-
-              <input
-                type="number"
-                className="w-full rounded border p-2 text-sm focus:outline-green-500"
-                placeholder="Display Order"
-                value={display_order}
-                onChange={(e) => setDisplayOrder(Number(e.target.value))}
-              />
-
-              <select
-                className="w-full rounded border p-2 text-sm focus:outline-green-500"
-                value={is_active}
-                onChange={(e) => setIsActive(Number(e.target.value))}
-              >
-                <option value={1}>Active</option>
-                <option value={0}>Inactive</option>
-              </select>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2">
+            {!showPanel && (
               <button
-                onClick={() => setShowModal(false)}
-                className="rounded bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 transition"
+                onClick={() => setShowPanel(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm shadow"
               >
-                Cancel
+                + Add Category
               </button>
-              <button
-                onClick={handleSubmit}
-                className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition"
-              >
-                Save Category
-              </button>
-            </div>
+            )}
           </div>
+
+          <table className="w-full text-sm min-w-[700px]">
+            <thead>
+              <tr className="text-left text-gray-400 text-xs uppercase border-b">
+                <th className="pb-3 pr-4 font-medium">Display Order</th>
+                <th className="pb-3 pr-4 font-medium">Name</th>
+                <th className="pb-3 pr-4 font-medium">Slug</th>
+                <th className="pb-3 pr-4 font-medium">
+                  Sub-Categories
+                </th>
+                <th className="pb-3 pr-4 font-medium">Status</th>
+                <th className="pb-3 font-medium">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <tr
+                    key={category.category_id}
+                    className="border-b last:border-0"
+                  >
+                    <td className="py-4 pr-4 text-gray-700">
+                      {category.display_order}
+                    </td>
+
+                    <td className="py-4 pr-4 font-semibold text-gray-800">
+                      {category.category_name}
+                    </td>
+
+                    <td className="py-4 pr-4 text-blue-500">
+                      {category.slug}
+                    </td>
+
+                    <td className="py-4 pr-4">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 text-gray-600 text-xs font-semibold">
+                        {category.sub_categories_count ?? 0}
+                      </span>
+                    </td>
+
+                    <td className="py-4 pr-4">
+                      {category.is_active === 1 ? (
+                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                          ACTIVE
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
+                          INACTIVE
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="py-4">
+                      <div className="flex gap-2">
+                        <button
+                          className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50"
+                          title="Edit"
+                        >
+                          <Pencil size={14} className="text-gray-500" />
+                        </button>
+
+                        <button
+                          onClick={() => toggleStatus(category)}
+                          className="w-8 h-8 flex items-center justify-center border border-amber-200 bg-amber-50 rounded-lg hover:bg-amber-100"
+                          title="Toggle Status"
+                        >
+                          <Power size={14} className="text-amber-500" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center py-16">
+                    <div className="text-5xl mb-3">📂</div>
+                    <h2 className="text-xl font-bold text-gray-700">
+                      No Categories Found
+                    </h2>
+                    <p className="text-gray-500 mt-2">
+                      Add your first category using the panel.
+                    </p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+        {/* Add Category Panel (button-triggered) */}
+        {showPanel && (
+          <AddCategoryDrawer
+          open={showPanel}
+          onClose={() => setShowPanel(false)}
+          onSuccess={() => {
+            loadCategories();
+            setShowPanel(false);
+          }}
+        />
+        )}
+      </div>
     </div>
   );
 }
