@@ -6,7 +6,17 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "sbstechnologies.in",
-        pathname: "/ecommerce/images/**",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
       },
     ],
   },
