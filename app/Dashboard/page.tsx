@@ -1,9 +1,9 @@
-import StatCard from "@/app/components/StatCard";
-import ChartBox from "@/app/components/ChartBox";
-import TopSellingProducts from "@/app/components/TopSellingProducts";
-import RecentOrders from "@/app/components/RecentOrders";
-import CustomerGrowth from "@/app/components/CustomerGrowth";
-import TrafficSource from "@/app/components/TrafficSource";
+import StatCard from "@/app/components/Dashboard/StatCard";
+import ChartBox from "@/app/components/Dashboard/ChartBox";
+import TopSellingProducts from "@/app/components/Dashboard/TopSellingProducts";
+import RecentOrders from "@/app/components/Dashboard/RecentOrders";
+import CustomerGrowth from "@/app/components/Dashboard/CustomerGrowth";
+import TrafficSource from "@/app/components/Dashboard/TrafficSource";
 
 export default function DashboardPage() {
   return (
